@@ -1,0 +1,150 @@
+.cta-banner {
+  padding: 80px 24px;
+  background: #ffffff;
+  border-top: 1px solid #e8e2d9;
+}
+
+.cta-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.cta-content {
+  margin-bottom: 48px;
+}
+
+.cta-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.6rem;
+  font-weight: 700;
+  color: #2c3e2d;
+  margin: 0 0 16px;
+}
+
+.cta-text {
+  font-size: 1.15rem;
+  color: #6a7a6b;
+  margin: 0 0 32px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.7;
+}
+
+.cta-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.cta-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #3a5a40;
+  color: white;
+  border: none;
+  border-radius: 14px;
+  padding: 18px 40px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 6px 24px rgba(58, 90, 64, 0.35);
+}
+
+.cta-btn-primary:hover {
+  background: #2c3e2d;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 32px rgba(58, 90, 64, 0.45);
+}
+
+.cta-guarantee {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #7a9e7e;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.cta-guarantee svg {
+  color: #3a5a40;
+}
+
+.cta-features {
+  display: flex;
+  justify-content: center;
+  gap: 48px;
+  padding-top: 40px;
+  border-top: 1px solid #e8e2d9;
+}
+
+.feature {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #4a5a4b;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.feature svg {
+  color: #3a5a40;
+}
+
+/* Dark Mode */
+:host-context(.dark-mode) .cta-banner {
+  background: #1f2a20;
+  border-color: #2e3d2f;
+}
+
+:host-context(.dark-mode) .cta-title {
+  color: #c8e6c9;
+}
+
+:host-context(.dark-mode) .cta-text {
+  color: #8abf8e;
+}
+
+:host-context(.dark-mode) .cta-btn-primary {
+  background: #4a7a50;
+}
+
+:host-context(.dark-mode) .cta-btn-primary:hover {
+  background: #5a8a60;
+}
+
+:host-context(.dark-mode) .cta-guarantee {
+  color: #7abd7e;
+}
+
+:host-context(.dark-mode) .cta-features {
+  border-color: #2e3d2f;
+}
+
+:host-context(.dark-mode) .feature {
+  color: #a8c8a9;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .cta-title {
+    font-size: 2rem;
+  }
+
+  .cta-features {
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+  }
+
+  .cta-btn-primary {
+    width: 100%;
+    max-width: 300px;
+    justify-content: center;
+  }
+}

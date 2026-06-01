@@ -1,0 +1,28 @@
+<app-site-header (toggleCart)="toggleCart()"></app-site-header>
+
+<main class="home-page">
+  <!-- Hero Section -->
+  <app-hero (shopNow)="scrollToProducts()"></app-hero>
+
+  <!-- Benefits Section -->
+  <app-benefits></app-benefits>
+
+  <!-- Featured Products Section -->
+  <app-featured-products
+    [products]="featuredProducts()"
+    (addToCart)="addToCart($event)"
+    (viewProduct)="viewProduct($event)">
+  </app-featured-products>
+
+  <!-- Testimonials Section -->
+  <app-testimonials></app-testimonials>
+
+  <!-- Urgency Section -->
+  <app-urgency (shopNow)="scrollToProducts()"></app-urgency>
+
+  <!-- CTA Banner -->
+  <app-cta-banner (shopNow)="scrollToProducts()"></app-cta-banner>
+
+  <!-- Footer -->
+  <app-footer></app-footer>
+</main>

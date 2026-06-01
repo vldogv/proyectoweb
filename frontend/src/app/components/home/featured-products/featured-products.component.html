@@ -1,0 +1,55 @@
+<section class="featured">
+  <div class="featured-container">
+    <div class="section-header">
+      <span class="section-badge">Destacados</span>
+      <h2 class="section-title">Nuestros Productos Más Vendidos</h2>
+      <p class="section-subtitle">Descubre los favoritos de nuestros clientes con ingredientes 100% naturales</p>
+    </div>
+
+    <div class="products-grid">
+      @for (product of products; track product.id) {
+        <article class="product-card">
+          <div class="product-image-wrapper" (click)="onViewProduct(product)">
+            <img [src]="'/' + product.imageUrl" [alt]="product.name" class="product-image" />
+            @if (product.inStock) {
+              <span class="product-badge">-20%</span>
+            }
+            @if (!product.inStock) {
+              <div class="out-of-stock-overlay">
+                <span>Agotado</span>
+              </div>
+            }
+          </div>
+          <div class="product-content">
+            <span class="product-category">{{ product.category }}</span>
+            <h3 class="product-name" (click)="onViewProduct(product)">{{ product.name }}</h3>
+            <p class="product-description">{{ product.description }}</p>
+            <div class="product-pricing">
+              <span class="price-current">{{ getDiscountedPrice(product.price) | currency:'MXN':'symbol-narrow':'1.0-0' }}</span>
+              <span class="price-original">{{ product.price | currency:'MXN':'symbol-narrow':'1.0-0' }}</span>
+            </div>
+            <button 
+              class="add-to-cart-btn" 
+              [class.added]="isAdded(product.id)"
+              [disabled]="!product.inStock"
+              (click)="onAddToCart(product)"
+            >
+              @if (isAdded(product.id)) {
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                Agregado
+              } @else {
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                </svg>
+                Agregar al Carrito
+              }
+            </button>
+          </div>
+        </article>
+      }
+    </div>
+  </div>
+</section>

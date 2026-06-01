@@ -1,0 +1,360 @@
+<!-- admin.component.html -->
+<nav class="header">
+  <button class="back-btn" (click)="goHome()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M19 12H5M12 19l-7-7 7-7"/>
+    </svg>
+    Tienda
+  </button>
+  <h1 class="logo">Natureza <span class="admin-badge">Admin</span></h1>
+  <button class="logout-btn" (click)="logout()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+      <polyline points="16 17 21 12 16 7"/>
+      <line x1="21" y1="12" x2="9" y2="12"/>
+    </svg>
+    Cerrar Sesión
+  </button>
+</nav>
+
+<!-- Toast -->
+@if (toast()) {
+  <div class="toast" [ngClass]="toast()!.tipo === 'ok' ? 'toast-ok' : 'toast-err'">
+    {{ toast()!.msg }}
+  </div>
+}
+
+<main class="container">
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab" [class.active]="activeTab()==='pedidos'"   (click)="activeTab.set('pedidos')">
+      📋 Pedidos
+      <span class="badge">{{ pedidos().length }}</span>
+    </button>
+    <button class="tab" [class.active]="activeTab()==='productos'" (click)="activeTab.set('productos')">
+      📦 Productos
+      <span class="badge">{{ productos().length }}</span>
+    </button>
+    <button class="tab" [class.active]="activeTab()==='usuarios'"  (click)="activeTab.set('usuarios')">
+      👥 Usuarios
+      <span class="badge">{{ usuarios().length }}</span>
+    </button>
+    <button class="tab" [class.active]="activeTab()==='tickets'"  (click)="activeTab.set('tickets')">
+      💬 Tickets
+      <span class="badge">{{ tickets().length }}</span>
+    </button>
+  </div>
+
+  <!-- ══ PEDIDOS ══════════════════════════════════════════════════════════ -->
+  @if (activeTab() === 'pedidos') {
+    <section class="section">
+      <h2 class="section-title">Todos los pedidos</h2>
+
+      @if (cargandoPedidos()) {
+        <div class="loading">Cargando pedidos…</div>
+      } @else if (pedidos().length === 0) {
+        <div class="empty">No hay pedidos registrados.</div>
+      } @else {
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Usuario</th>
+                <th>Fecha</th>
+                <th>Total</th>
+                <th>Pago</th>
+                <th>Estado pedido</th>
+                <th>Estado envío</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (p of pedidos(); track p.id) {
+                <tr>
+                  <td class="id-cell">{{ p.id }}</td>
+                  <td>
+                    <span class="user-name">{{ p.shippingAddress?.fullName || 'N/A' }}</span>
+                  </td>
+                  <td>{{ p.createdAt | date:'dd/MM/yy HH:mm' }}</td>
+                  <td class="price-cell">{{ p.total | currency:'MXN':'symbol-narrow':'1.2-2' }}</td>
+                  <td>
+                    <span class="method-tag" [ngClass]="p.paymentMethod === 'paypal' ? 'tag-paypal' : 'tag-card'">
+                      {{ p.paymentMethod === 'paypal' ? 'PayPal' : 'Tarjeta' }}
+                    </span>
+                  </td>
+                  <td>
+                    <select class="status-select"
+                      [value]="p.status"
+                      (change)="cambiarEstadoPedido(p.id, 'orderStatus', $any($event.target).value)">
+                      @for (s of orderStatuses; track s.value) {
+                        <option [value]="s.value" [selected]="p.status === s.value">{{ s.label }}</option>
+                      }
+                    </select>
+                  </td>
+                  <td>
+                    <select class="status-select"
+                      [value]="p.shippingStatus"
+                      (change)="cambiarEstadoPedido(p.id, 'shippingStatus', $any($event.target).value)">
+                      @for (s of shippingStatuses; track s.value) {
+                        <option [value]="s.value" [selected]="p.shippingStatus === s.value">{{ s.label }}</option>
+                      }
+                    </select>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+
+  <!-- ══ PRODUCTOS ════════════════════════════════════════════════════════ -->
+  @if (activeTab() === 'productos') {
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title">Catálogo de productos</h2>
+        <button class="btn-primary" (click)="abrirNuevoProducto()">+ Nuevo producto</button>
+      </div>
+
+      <!-- Formulario crear/editar -->
+      @if (mostrarFormProducto()) {
+        <div class="form-card">
+          <h3 class="form-title">{{ editandoProducto() ? 'Editar producto' : 'Nuevo producto' }}</h3>
+          <div class="form-grid">
+            <div class="form-group full">
+              <label>Nombre *</label>
+              <input type="text" [(ngModel)]="productoForm.name" placeholder="Nombre del producto"/>
+            </div>
+            <div class="form-group">
+              <label>Precio (MXN) *</label>
+              <input type="number" [(ngModel)]="productoForm.price" placeholder="0.00" min="0"/>
+            </div>
+            <div class="form-group">
+              <label>Categoría *</label>
+              <select [(ngModel)]="productoForm.category">
+                <option value="">Seleccionar…</option>
+                @for (cat of categorias; track cat) {
+                  <option [value]="cat">{{ cat }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Stock</label>
+              <input type="number" [(ngModel)]="productoForm.stock" min="0"/>
+            </div>
+            <div class="form-group">
+              <label>Disponible</label>
+              <select [(ngModel)]="productoForm.inStock">
+                <option [ngValue]="true">Sí</option>
+                <option [ngValue]="false">No</option>
+              </select>
+            </div>
+            <div class="form-group full">
+              <label>Imagen del producto</label>
+              <div class="image-upload-wrap">
+                @if (imagenPreview()) {
+                  <div class="image-preview">
+                    <img [src]="imagenPreview()" alt="Preview"/>
+                  </div>
+                }
+                <label class="file-upload-btn" [class.uploading]="subiendoImagen()">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                  @if (subiendoImagen()) { Subiendo… }
+                  @else if (imagenPreview()) { Cambiar imagen }
+                  @else { Seleccionar imagen }
+                  <input type="file" accept="image/*" (change)="onImagenSeleccionada($event)" hidden/>
+                </label>
+              </div>
+            </div>
+            <div class="form-group full">
+              <label>Descripción</label>
+              <textarea [(ngModel)]="productoForm.description" rows="3" placeholder="Descripción del producto…"></textarea>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn-primary" (click)="guardarProducto()">
+              {{ editandoProducto() ? 'Guardar cambios' : 'Crear producto' }}
+            </button>
+            <button class="btn-secondary" (click)="cancelarForm()">Cancelar</button>
+          </div>
+        </div>
+      }
+
+      @if (cargandoProductos()) {
+        <div class="loading">Cargando productos…</div>
+      } @else {
+        <div class="products-grid">
+          @for (p of productos(); track p.id) {
+            <div class="product-card" [ngClass]="{'out-of-stock': !p.inStock}">
+              <div class="product-img-wrap">
+                <img [src]="p.imageUrl" [alt]="p.name" class="product-img"
+                     onerror="this.style.display='none'"/>
+                <span class="stock-badge" [ngClass]="p.inStock ? 'in-stock' : 'no-stock'">
+                  {{ p.inStock ? 'Disponible' : 'Agotado' }}
+                </span>
+              </div>
+              <div class="product-info">
+                <span class="product-cat">{{ p.category }}</span>
+                <h4 class="product-name">{{ p.name }}</h4>
+                <div class="product-meta">
+                  <span class="product-price">{{ p.price | currency:'MXN':'symbol-narrow':'1.2-2' }}</span>
+                  <span class="product-stock">Stock: {{ p.stock }}</span>
+                </div>
+              </div>
+              <div class="product-actions">
+                <button class="btn-icon edit"  (click)="abrirEditar(p)" title="Editar">✏️</button>
+                <button class="btn-icon toggle" (click)="toggleStock(p)"
+                  [title]="p.inStock ? 'Marcar agotado' : 'Marcar disponible'">
+                  {{ p.inStock ? '🚫' : '✅' }}
+                </button>
+                <button class="btn-icon delete" (click)="eliminarProducto(p.id)" title="Eliminar">🗑️</button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </section>
+  }
+
+  <!-- ══ USUARIOS ═════════════════════════════════════════════════════════ -->
+  @if (activeTab() === 'usuarios') {
+    <section class="section">
+      <h2 class="section-title">Usuarios registrados</h2>
+
+      <!-- Formulario edición usuario -->
+      @if (editandoUsuario()) {
+        <div class="form-card">
+          <h3 class="form-title">Editar usuario #{{ editandoUsuario()!.id }}</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Nombre completo</label>
+              <input type="text" [(ngModel)]="usuarioForm.fullName"/>
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" [(ngModel)]="usuarioForm.email"/>
+            </div>
+            <div class="form-group">
+              <label>Rol</label>
+              <select [(ngModel)]="usuarioForm.isAdmin">
+                <option [ngValue]="false">Cliente</option>
+                <option [ngValue]="true">Admin</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn-primary" (click)="guardarUsuario()">Guardar cambios</button>
+            <button class="btn-secondary" (click)="cancelarEditarUsuario()">Cancelar</button>
+          </div>
+        </div>
+      }
+
+      @if (cargandoUsuarios()) {
+        <div class="loading">Cargando usuarios…</div>
+      } @else if (usuarios().length === 0) {
+        <div class="empty">No hay usuarios registrados.</div>
+      } @else {
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>#</th><th>Nombre</th><th>Email</th><th>Rol</th><th>Registro</th><th>Acción</th></tr>
+            </thead>
+            <tbody>
+              @for (u of usuarios(); track u.id) {
+                <tr>
+                  <td class="id-cell">{{ u.id }}</td>
+                  <td>{{ u.fullName }}</td>
+                  <td class="email-cell">{{ u.email }}</td>
+                  <td>
+                    <span class="role-badge" [ngClass]="u.isAdmin ? 'role-admin' : 'role-user'">
+                      {{ u.isAdmin ? 'Admin' : 'Cliente' }}
+                    </span>
+                  </td>
+                  <td>{{ u.createdAt | date:'dd/MM/yyyy' }}</td>
+                  <td>
+                    <button class="btn-icon edit" (click)="abrirEditarUsuario(u)" title="Editar">✏️</button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+
+  <!-- ══ TICKETS ════════════════════════════════════════════════════════════ -->
+  @if (activeTab() === 'tickets') {
+    <section class="section">
+      <h2 class="section-title">Tickets de soporte</h2>
+
+      @if (cargandoTickets()) {
+        <div class="loading">Cargando tickets…</div>
+      } @else if (tickets().length === 0) {
+        <div class="empty">No hay tickets registrados.</div>
+      } @else {
+        <div class="tickets-admin">
+          @for (t of tickets(); track t.id) {
+            <div class="ticket-card-admin" [ngClass]="'ts-' + t.status">
+              <div class="ticket-row" (click)="toggleTicket(t.id)">
+                <span class="tid">#{{ t.id }}</span>
+                <div class="tinfo">
+                  <span class="tsubject">{{ t.subject }}</span>
+                  <span class="tuser">{{ t.userName }} · {{ t.userEmail }}</span>
+                </div>
+                <div class="tbadges">
+                  <select class="status-select" [(ngModel)]="t.status"
+                    (change)="cambiarEstadoTicket(t.id, $any($event.target).value)"
+                    (click)="$event.stopPropagation()">
+                    @for (s of ticketStatuses; track s.value) {
+                      <option [value]="s.value">{{ s.label }}</option>
+                    }
+                  </select>
+                  <span class="priority-tag" [ngClass]="'tp-' + t.priority">{{ priorityLabels[t.priority] }}</span>
+                  <span class="tdate">{{ t.createdAt | date:'dd/MM/yy' }}</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    class="tchev" [class.open]="ticketExpandido() === t.id">
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </div>
+              </div>
+
+              @if (ticketExpandido() === t.id) {
+                <div class="thread">
+                  <div class="bubble ububble">
+                    <strong>{{ t.userName }}</strong>
+                    <p>{{ t.message }}</p>
+                    <small>{{ t.createdAt | date:'dd/MM/yy HH:mm' }}</small>
+                  </div>
+                  @for (r of t.replies; track r.id) {
+                    <div class="bubble" [ngClass]="r.fromAdmin ? 'abubble' : 'ububble'">
+                      <strong>{{ r.authorName }}</strong>
+                      <p>{{ r.message }}</p>
+                      <small>{{ r.createdAt | date:'dd/MM/yy HH:mm' }}</small>
+                    </div>
+                  }
+                  <div class="reply-box">
+                    <textarea [(ngModel)]="replyForms[t.id]" rows="3"
+                      placeholder="Escribir respuesta al cliente…"></textarea>
+                    <button class="btn-primary"
+                      (click)="responderTicket(t)"
+                      [disabled]="enviandoReply() === t.id">
+                      @if (enviandoReply() === t.id) { Enviando… } @else { Responder y notificar por email }
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </section>
+  }
+
+</main>

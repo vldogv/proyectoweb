@@ -1,0 +1,189 @@
+/* resumen-envio.component.css */
+
+.shipping-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Tarjeta de opción */
+.shipping-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 2px solid #e8e2d9;
+  border-radius: 14px;
+  background: #faf8f5;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.15s;
+  user-select: none;
+}
+
+.shipping-card:hover {
+  border-color: #c4d1c6;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.shipping-card.active {
+  border-color: #3a5a40;
+  background: #f0f4f1;
+}
+
+/* Radio visual */
+.shipping-radio {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border: 2px solid #d0cabc;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  transition: border-color 0.2s;
+}
+
+.shipping-card.active .shipping-radio {
+  border-color: #3a5a40;
+}
+
+.radio-inner {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: transparent;
+  transition: background 0.2s;
+}
+
+.shipping-card.active .radio-inner {
+  background: #3a5a40;
+}
+
+/* Icono del carrier */
+.carrier-icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #5a6a5a;
+  background: #e8e2d9;
+  transition: background 0.2s, color 0.2s;
+}
+
+.shipping-card.active .carrier-icon {
+  background: #d4e4d6;
+  color: #3a5a40;
+}
+
+.carrier-icon.express {
+  background: #e8f0fb;
+  color: #2563eb;
+}
+
+.shipping-card.active .carrier-icon.express {
+  background: #cfe0fd;
+  color: #1d4ed8;
+}
+
+/* Texto */
+.shipping-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.shipping-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #2c3e2d;
+}
+
+.shipping-meta {
+  font-size: 0.8rem;
+  color: #7a9e7e;
+}
+
+/* Precio */
+.shipping-cost {
+  flex-shrink: 0;
+}
+
+.cost-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #bc6c25;
+}
+
+.free-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  background: #e8f5e9;
+  color: #388e3c;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-radius: 20px;
+  letter-spacing: 0.3px;
+}
+
+/* ─── Dark Mode ────────────────────────────────────────────────────────── */
+
+:host-context(.dark-mode) .shipping-card {
+  background: #2a3a2b;
+  border-color: #2e3d2f;
+}
+
+:host-context(.dark-mode) .shipping-card:hover {
+  border-color: #4a634e;
+}
+
+:host-context(.dark-mode) .shipping-card.active {
+  background: #314433;
+  border-color: #588157;
+}
+
+:host-context(.dark-mode) .shipping-radio {
+  background: #1f2a20;
+  border-color: #4a634e;
+}
+
+:host-context(.dark-mode) .shipping-card.active .shipping-radio {
+  border-color: #7a9e7e;
+}
+
+:host-context(.dark-mode) .shipping-card.active .radio-inner {
+  background: #7a9e7e;
+}
+
+:host-context(.dark-mode) .carrier-icon {
+  background: #1f2a20;
+  color: #8fa88f;
+}
+
+:host-context(.dark-mode) .shipping-card.active .carrier-icon {
+  background: #2a3a2b;
+  color: #7a9e7e;
+}
+
+:host-context(.dark-mode) .carrier-icon.express {
+  background: #1a2438;
+  color: #60a5fa;
+}
+
+:host-context(.dark-mode) .shipping-name {
+  color: #c8e6c9;
+}
+
+:host-context(.dark-mode) .cost-value {
+  color: #e8a87c;
+}
+
+:host-context(.dark-mode) .free-badge {
+  background: #1e3a2a;
+  color: #66bb6a;
+}

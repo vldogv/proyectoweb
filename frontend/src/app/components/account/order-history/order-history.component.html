@@ -1,0 +1,136 @@
+@if (orders().length === 0) {
+  <div class="empty-state">
+    <div class="empty-icon">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <path d="M16 10a4 4 0 0 1-8 0"/>
+      </svg>
+    </div>
+    <h3 class="empty-title">No tienes pedidos aún</h3>
+    <p class="empty-text">Cuando realices una compra, aparecerá aquí tu historial de pedidos.</p>
+  </div>
+} @else {
+  <div class="orders-list">
+    @for (order of orders(); track order.id) {
+      <div class="order-card" [class.expanded]="isExpanded(order.id)">
+
+        <!-- Cabecera del pedido (clic para expandir) -->
+        <div class="order-header" (click)="toggleOrder(order.id)">
+          <div class="order-main">
+            <span class="order-id">{{ order.id }}</span>
+            <span class="order-date">{{ order.createdAt | date:'dd MMM yyyy, HH:mm' }}</span>
+          </div>
+          <div class="order-summary">
+            <!-- Estado de pago -->
+            <span
+              class="order-status"
+              [style.background]="getStatusColor(order.status) + '20'"
+              [style.color]="getStatusColor(order.status)">
+              {{ getStatusLabel(order.status) }}
+            </span>
+            <!-- Estado de envío (solo si existe) -->
+            @if (order.shippingStatus) {
+              <span
+                class="order-status shipping-status"
+                [style.background]="getShippingColor(order.shippingStatus) + '20'"
+                [style.color]="getShippingColor(order.shippingStatus)">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <rect x="1" y="3" width="15" height="13" rx="1"/>
+                  <path d="M16 8h4l3 5v4h-7V8z"/>
+                  <circle cx="5.5" cy="18.5" r="2.5"/>
+                  <circle cx="18.5" cy="18.5" r="2.5"/>
+                </svg>
+                {{ getShippingLabel(order.shippingStatus) }}
+              </span>
+            }
+            <span class="order-total">{{ order.total | currency:'MXN':'symbol-narrow':'1.2-2' }}</span>
+            <svg
+              class="expand-icon"
+              [class.rotated]="isExpanded(order.id)"
+              width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Detalles expandidos -->
+        @if (isExpanded(order.id)) {
+          <div class="order-details">
+
+            <!-- Productos -->
+            <div class="detail-section">
+              <h4 class="section-label">Productos</h4>
+              <ul class="items-list">
+                @for (item of order.items; track item.productId) {
+                  <li class="item">
+                    <img [src]="item.productImage" [alt]="item.productName" class="item-image" />
+                    <div class="item-info">
+                      <span class="item-name">{{ item.productName }}</span>
+                      <span class="item-qty">Cantidad: {{ item.quantity }}</span>
+                    </div>
+                    <span class="item-price">
+                      {{ item.unitPrice * item.quantity | currency:'MXN':'symbol-narrow':'1.2-2' }}
+                    </span>
+                  </li>
+                }
+              </ul>
+            </div>
+
+            <!-- Dirección de envío -->
+            <div class="detail-section">
+              <h4 class="section-label">Dirección de envío</h4>
+              <div class="address-info">
+                <p class="address-name">{{ order.shippingAddress.fullName }}</p>
+                <p class="address-line">{{ order.shippingAddress.street }}</p>
+                <p class="address-line">{{ order.shippingAddress.city }}, CP {{ order.shippingAddress.postalCode }}</p>
+                <p class="address-phone">Tel: {{ order.shippingAddress.phone }}</p>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Fila de envío (solo si el pedido tiene datos de envío) -->
+          @if (order.shippingStatus || order.trackingNumber) {
+            <div class="shipping-row">
+              <div class="shipping-row-info">
+                @if (order.shippingOption) {
+                  <span class="shipping-carrier">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="1" y="3" width="15" height="13" rx="1"/>
+                      <path d="M16 8h4l3 5v4h-7V8z"/>
+                      <circle cx="5.5" cy="18.5" r="2.5"/>
+                      <circle cx="18.5" cy="18.5" r="2.5"/>
+                    </svg>
+                    {{ order.shippingOption.label }} · {{ order.shippingOption.carrier }}
+                  </span>
+                }
+                @if (order.trackingNumber) {
+                  <span class="shipping-tracking">
+                    Guía: <code>{{ order.trackingNumber }}</code>
+                  </span>
+                }
+                @if (order.shippingStatus) {
+                  <span
+                    class="shipping-status-pill"
+                    [style.background]="getShippingColor(order.shippingStatus) + '20'"
+                    [style.color]="getShippingColor(order.shippingStatus)">
+                    {{ getShippingLabel(order.shippingStatus) }}
+                  </span>
+                }
+              </div>
+              <button class="track-btn" (click)="verSeguimiento(order.id)">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"/>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                Ver seguimiento
+              </button>
+            </div>
+          }
+        }
+
+      </div>
+    }
+  </div>
+}

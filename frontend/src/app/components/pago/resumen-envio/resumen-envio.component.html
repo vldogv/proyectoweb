@@ -1,0 +1,45 @@
+<div class="shipping-options">
+  @for (opcion of opciones; track opcion.id) {
+    <div
+      class="shipping-card"
+      [ngClass]="{ 'active': isSeleccionada(opcion) }"
+      (click)="seleccionar(opcion)"
+    >
+      <!-- Radio visual -->
+      <div class="shipping-radio">
+        <div class="radio-inner"></div>
+      </div>
+
+      <!-- Icono del carrier -->
+      <div class="carrier-icon" [ngClass]="opcion.id">
+        @if (opcion.id === 'express') {
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+          </svg>
+        } @else {
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="1" y="3" width="15" height="13" rx="1"/>
+            <path d="M16 8h4l3 5v4h-7V8z"/>
+            <circle cx="5.5" cy="18.5" r="2.5"/>
+            <circle cx="18.5" cy="18.5" r="2.5"/>
+          </svg>
+        }
+      </div>
+
+      <!-- Información -->
+      <div class="shipping-info">
+        <span class="shipping-name">{{ opcion.label }}</span>
+        <span class="shipping-meta">{{ opcion.carrier }} · {{ opcion.estimatedDays }} días hábiles</span>
+      </div>
+
+      <!-- Costo -->
+      <div class="shipping-cost">
+        @if (opcion.cost === 0) {
+          <span class="free-badge">Gratis</span>
+        } @else {
+          <span class="cost-value">{{ opcion.cost | currency:'MXN':'symbol-narrow':'1.2-2' }}</span>
+        }
+      </div>
+    </div>
+  }
+</div>

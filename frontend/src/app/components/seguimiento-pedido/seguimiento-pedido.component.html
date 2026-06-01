@@ -1,0 +1,330 @@
+<!-- seguimiento-pedido.component.html -->
+<nav class="header no-print">
+  <button class="back-btn" (click)="volver()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M19 12H5M12 19l-7-7 7-7"/>
+    </svg>
+    Mis Pedidos
+  </button>
+  <h1 class="logo">Natureza</h1>
+  <div class="header-spacer"></div>
+</nav>
+
+<main class="container">
+
+  <!-- ── CARGANDO ──────────────────────────────────────────────────────── -->
+  @if (cargando()) {
+    <div class="not-found">
+      <div class="spinner-large"></div>
+      <p style="color:#8a9e8b;margin-top:16px;">Cargando pedido…</p>
+    </div>
+  }
+
+  <!-- ── PEDIDO NO ENCONTRADO ──────────────────────────────────────────── -->
+  @else if (!pedido()) {
+    <div class="not-found">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#8a9e8b" stroke-width="1.5">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <h2>Pedido no encontrado</h2>
+      <p>No pudimos encontrar este pedido en tu cuenta.</p>
+      <button class="btn primary" (click)="volver()">Volver a mis pedidos</button>
+    </div>
+  }
+
+  <!-- ── CONTENIDO PRINCIPAL ───────────────────────────────────────────── -->
+  @else if (pedido()) {
+    <div class="tracking-layout">
+
+      <!-- Columna principal -->
+      <div class="main-column">
+
+        <!-- Cabecera del pedido -->
+        <div class="order-header card">
+          <div class="header-info">
+            <h1 class="page-title">Pedido {{ pedido()!.id }}</h1>
+            <span class="order-date">
+              Realizado el {{ pedido()!.createdAt | date:"dd 'de' MMMM, yyyy" : '' : 'es-MX' }}
+            </span>
+          </div>
+          <div class="header-right">
+            <span class="status-badge" [style.background]="getStatusColor(pedido()!.status) + '20'" [style.color]="getStatusColor(pedido()!.status)">
+              {{ getStatusLabel(pedido()!.status) }}
+            </span>
+            <button class="btn secondary no-print" (click)="imprimirRecibo()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 6 2 18 2 18 9"/>
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                <rect x="6" y="14" width="12" height="8"/>
+              </svg>
+              Imprimir recibo
+            </button>
+          </div>
+        </div>
+
+        <!-- Stepper de envío (6 pasos) -->
+        @if (pedido()!.shippingStatus) {
+          <div class="timeline-card card">
+            <h2 class="section-title">Seguimiento del envío</h2>
+            <div class="stepper">
+              @for (paso of pasosEnvio; track paso.id; let last = $last) {
+                <div class="step"
+                  [ngClass]="{
+                    'completed': isEnvioCompletado(paso.id),
+                    'active':    isEnvioActual(paso.id)
+                  }">
+                  <div class="step-icon-container">
+                    <div class="step-icon">
+                      <!-- pending -->
+                      @if (paso.id === 'pending') {
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                          <polyline points="14 2 14 8 20 8"/>
+                          <path d="M9 12l2 2 4-4"/>
+                        </svg>
+                      }
+                      <!-- ready -->
+                      @else if (paso.id === 'ready') {
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                        </svg>
+                      }
+                      <!-- picked_up -->
+                      @else if (paso.id === 'picked_up') {
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M5 12H2l10-9 10 9h-3"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/>
+                        </svg>
+                      }
+                      <!-- in_transit -->
+                      @else if (paso.id === 'in_transit') {
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <rect x="1" y="3" width="15" height="13" rx="1"/>
+                          <path d="M16 8h4l3 5v4h-7V8z"/>
+                          <circle cx="5.5" cy="18.5" r="2.5"/>
+                          <circle cx="18.5" cy="18.5" r="2.5"/>
+                        </svg>
+                      }
+                      <!-- out_for_delivery -->
+                      @else if (paso.id === 'out_for_delivery') {
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                          <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                      }
+                      <!-- delivered -->
+                      @else {
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                          <polyline points="22 4 12 14.01 9 11.01"/>
+                        </svg>
+                      }
+                    </div>
+                  </div>
+                  <span class="step-label">{{ paso.etiqueta }}</span>
+                  @if (!last) { <div class="step-line"></div> }
+                </div>
+              }
+            </div>
+
+            <!-- Fecha estimada de entrega -->
+            @if (fechaEstimadaEntrega && pedido()!.shippingStatus !== 'delivered') {
+              <p class="delivery-estimate">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/>
+                  <line x1="8"  y1="2" x2="8"  y2="6"/>
+                  <line x1="3"  y1="10" x2="21" y2="10"/>
+                </svg>
+                Entrega estimada:
+                <strong>{{ fechaEstimadaEntrega | date:"EEEE dd 'de' MMMM" : '' : 'es-MX' }}</strong>
+                · {{ pedido()!.shippingOption?.carrier }}
+              </p>
+            }
+            @if (pedido()!.shippingStatus === 'delivered') {
+              <p class="delivery-estimate delivered">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                  <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+                ¡Paquete entregado! Esperamos que disfrutes tu compra.
+              </p>
+            }
+          </div>
+        }
+
+        <!-- Información de envío + timeline de eventos -->
+        <div class="grid-2-cols">
+
+          <!-- Dirección y datos del envío -->
+          <div class="tracking-info card">
+            <h2 class="section-title">Información de envío</h2>
+
+            <div class="info-group">
+              <span class="info-label">Destinatario</span>
+              <span class="info-value">{{ pedido()!.shippingAddress.fullName }}</span>
+            </div>
+            <div class="info-group">
+              <span class="info-label">Dirección</span>
+              <span class="info-value">
+                {{ pedido()!.shippingAddress.street }},
+                {{ pedido()!.shippingAddress.city }}
+                {{ pedido()!.shippingAddress.postalCode }}
+              </span>
+            </div>
+            <div class="info-group">
+              <span class="info-label">Teléfono</span>
+              <span class="info-value">{{ pedido()!.shippingAddress.phone }}</span>
+            </div>
+
+            @if (pedido()!.shippingOption) {
+              <div class="info-group">
+                <span class="info-label">Servicio de envío</span>
+                <span class="carrier-box">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="1" y="3" width="15" height="13" rx="1"/>
+                    <path d="M16 8h4l3 5v4h-7V8z"/>
+                    <circle cx="5.5" cy="18.5" r="2.5"/>
+                    <circle cx="18.5" cy="18.5" r="2.5"/>
+                  </svg>
+                  {{ pedido()!.shippingOption!.label }} · {{ pedido()!.shippingOption!.carrier }}
+                </span>
+              </div>
+            }
+
+            @if (pedido()!.trackingNumber) {
+              <div class="info-group">
+                <span class="info-label">Número de guía</span>
+                <div class="tracking-number-box">
+                  <span class="tracking-number">{{ pedido()!.trackingNumber }}</span>
+                  <button class="copy-btn" (click)="copiarTracking()" [title]="copiado() ? 'Copiado' : 'Copiar guía'">
+                    @if (copiado()) {
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3a5a40" stroke-width="2.5">
+                        <path d="M20 6L9 17l-5-5"/>
+                      </svg>
+                    } @else {
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                      </svg>
+                    }
+                  </button>
+                </div>
+              </div>
+            }
+
+            <div class="info-group">
+              <span class="info-label">Método de pago</span>
+              <span class="info-value">{{ labelMetodoPago }}</span>
+            </div>
+          </div>
+
+          <!-- Historial de eventos del tracking -->
+          <div class="history-card card">
+            <h2 class="section-title">Historial de movimientos</h2>
+
+            @if (pedido()!.trackingHistory && pedido()!.trackingHistory!.length > 0) {
+              <!-- Timeline con eventos reales -->
+              <div class="vertical-timeline">
+                @for (paso of pasosEnvio; track paso.id; let last = $last) {
+                  @let evento = getEventoHistorial(paso.id);
+                  @let completado = isEnvioCompletado(paso.id);
+                  @let actual = isEnvioActual(paso.id);
+                  <div class="v-step"
+                    [ngClass]="{ 'completed': completado, 'current': actual }">
+                    <div class="v-step-indicator">
+                      <div class="v-step-dot"></div>
+                      @if (!last) { <div class="v-step-line"></div> }
+                    </div>
+                    <div class="v-step-content">
+                      <h3 class="v-step-title">{{ paso.etiqueta }}</h3>
+                      @if (evento) {
+                        <p class="v-step-desc">{{ evento.label }}</p>
+                        <span class="v-step-date">
+                          {{ evento.timestamp | date:"dd MMM yyyy, HH:mm" : '' : 'es-MX' }}
+                        </span>
+                      } @else if (actual) {
+                        <p class="v-step-desc">En proceso ahora.</p>
+                      } @else if (!completado) {
+                        <p class="v-step-desc">Pendiente.</p>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <!-- Fallback para pedidos sin historial (orden antigua) -->
+              <div class="vertical-timeline">
+                @for (paso of pasosEnvio.slice(0,4); track paso.id; let last = $last) {
+                  <div class="v-step" [ngClass]="{ 'completed': paso.id === 'pending', 'current': paso.id === 'pending' }">
+                    <div class="v-step-indicator">
+                      <div class="v-step-dot"></div>
+                      @if (!last) { <div class="v-step-line"></div> }
+                    </div>
+                    <div class="v-step-content">
+                      <h3 class="v-step-title">{{ paso.etiqueta }}</h3>
+                      <p class="v-step-desc">
+                        @if (paso.id === 'pending') { Pedido registrado. }
+                        @else { Pendiente. }
+                      </p>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+        </div><!-- /grid-2-cols -->
+      </div><!-- /main-column -->
+
+      <!-- Sidebar: resumen del pedido -->
+      <div class="sidebar-column">
+        <div class="summary-card card">
+          <h2 class="section-title">Resumen del pedido</h2>
+
+          <ul class="summary-list">
+            @for (item of pedido()!.items; track item.productId) {
+              <li class="summary-item">
+                <img [src]="item.productImage" [alt]="item.productName" class="item-image"/>
+                <div class="item-info">
+                  <span class="item-name">{{ item.productName }}</span>
+                  <span class="item-qty">Cant: {{ item.quantity }}</span>
+                </div>
+                <span class="item-price">
+                  {{ item.unitPrice * item.quantity | currency:'MXN':'symbol-narrow':'1.2-2' }}
+                </span>
+              </li>
+            }
+          </ul>
+
+          <div class="summary-totals">
+            <div class="total-row">
+              <span>Subtotal</span>
+              <span>{{ subtotalPedido | currency:'MXN':'symbol-narrow':'1.2-2' }}</span>
+            </div>
+            <div class="total-row">
+              <span>Envío</span>
+              @if (costoPedido === 0) {
+                <span class="free">Gratis</span>
+              } @else {
+                <span>{{ costoPedido | currency:'MXN':'symbol-narrow':'1.2-2' }}</span>
+              }
+            </div>
+            <div class="total-row final">
+              <span>Total</span>
+              <span>{{ pedido()!.total | currency:'MXN':'symbol-narrow':'1.2-2' }}</span>
+            </div>
+          </div>
+
+          @if (pedido()!.paymentId) {
+            <div class="payment-info">
+              <span class="info-label">ID de transacción</span>
+              <span class="payment-id">{{ pedido()!.paymentId }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+    </div><!-- /tracking-layout -->
+  }
+
+</main>

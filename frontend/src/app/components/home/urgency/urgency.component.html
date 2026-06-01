@@ -1,0 +1,41 @@
+<section class="urgency">
+  <div class="urgency-container">
+    <div class="urgency-content">
+      <div class="urgency-badge">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+        </svg>
+        Oferta Flash
+      </div>
+      <h2 class="urgency-title">Solo Por Hoy: 30% de Descuento</h2>
+      <p class="urgency-text">En todos los productos de la categoría Cremas. Usa el código <strong>FLASH30</strong> al pagar.</p>
+      
+      <div class="countdown">
+        <div class="countdown-item">
+          <span class="countdown-value">{{ pad(hours()) }}</span>
+          <span class="countdown-label">Horas</span>
+        </div>
+        <span class="countdown-sep">:</span>
+        <div class="countdown-item">
+          <span class="countdown-value">{{ pad(minutes()) }}</span>
+          <span class="countdown-label">Minutos</span>
+        </div>
+        <span class="countdown-sep">:</span>
+        <div class="countdown-item">
+          <span class="countdown-value">{{ pad(seconds()) }}</span>
+          <span class="countdown-label">Segundos</span>
+        </div>
+      </div>
+
+      <button class="urgency-btn" (click)="onShopNow()">
+        Aprovechar Oferta
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </button>
+    </div>
+    <div class="urgency-visual">
+      <div class="discount-badge">-30%</div>
+    </div>
+  </div>
+</section>

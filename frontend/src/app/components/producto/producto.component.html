@@ -1,0 +1,47 @@
+<article class="card" (click)="onViewDetails()">
+  <div class="img-container">
+    <img class="img" [src]="product.imageUrl" [alt]="product.name" />
+    @if (!product.inStock) {
+      <span class="out-badge">Agotado</span>
+    }
+  </div>
+
+  <div class="body">
+    <div class="top">
+      <h3 class="title">{{ product.name }}</h3>
+      <span class="price">{{ product.price | currency:'MXN':'symbol-narrow':'1.0-0' }}</span>
+    </div>
+
+    <p class="meta">{{ product.category }}</p>
+    <p class="desc">{{ product.description }}</p>
+
+    <div class="bottom">
+      <p class="stock" [class.out]="!product.inStock">
+        <span class="dot"></span>
+        @if (product.inStock) { En stock } @else { Agotado }
+      </p>
+
+      <button
+        class="btn"
+        [class.added]="addedToCart()"
+        [disabled]="!puedeAgregar"
+        [title]="enLimiteStock ? 'Ya tienes el stock máximo en el carrito' : ''"
+        (click)="onAdd($event)"
+      >
+        @if (addedToCart()) {
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 6L9 17l-5-5"/>
+          </svg>
+          Agregado
+        } @else if (enLimiteStock && product.inStock) {
+          Límite
+        } @else {
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          Agregar
+        }
+      </button>
+    </div>
+  </div>
+</article>

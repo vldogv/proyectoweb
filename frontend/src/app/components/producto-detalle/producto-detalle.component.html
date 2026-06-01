@@ -1,0 +1,96 @@
+<app-site-header (toggleCart)="irAlCarrito()"></app-site-header>
+
+<main class="container">
+  @if (loading()) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Cargando producto...</p>
+    </div>
+  } @else if (!product()) {
+    <div class="not-found">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M16 16s-1.5-2-4-2-4 2-4 2M9 9h.01M15 9h.01"/>
+      </svg>
+      <h2>Producto no encontrado</h2>
+      <p>El producto que buscas no existe o ha sido eliminado.</p>
+      <button class="btn primary" (click)="volver()">Volver al catalogo</button>
+    </div>
+  } @else {
+    <div class="product-layout">
+      <div class="image-section">
+        <img [src]="product()!.imageUrl" [alt]="product()!.name" class="product-image" />
+        @if (!product()!.inStock) {
+          <div class="out-of-stock-overlay">Agotado</div>
+        }
+      </div>
+
+      <div class="info-section">
+        <span class="category">{{ product()!.category }}</span>
+        <h1 class="title">{{ product()!.name }}</h1>
+        <p class="price">{{ product()!.price | currency:'MXN':'symbol-narrow':'1.2-2' }}</p>
+        
+        <div class="stock-status" [class.out]="!product()!.inStock">
+          <span class="dot"></span>
+          @if (product()!.inStock) {
+            Disponible
+            @if (product()!.stock <= 5) {
+              <span class="low-stock"> — ¡Solo quedan {{ product()!.stock }}!</span>
+            }
+          } @else { Agotado }
+        </div>
+
+        <p class="description">{{ product()!.description }}</p>
+
+        @if (product()!.inStock) {
+          <div class="quantity-section">
+            <label class="quantity-label">Cantidad</label>
+            <div class="quantity-controls">
+              <button class="qty-btn" (click)="decrementar()" [disabled]="cantidad() <= 1">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M5 12h14"/>
+                </svg>
+              </button>
+              <span class="qty-value">{{ cantidad() }}</span>
+              <button class="qty-btn" (click)="incrementar()"
+                      [disabled]="cantidad() >= (product()!.stock ?? 999)"
+                      [title]="cantidad() >= (product()!.stock ?? 999) ? 'Stock máximo' : ''">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 5v14M5 12h14"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn primary large" (click)="agregarAlCarrito()" [class.added]="addedToCart()">
+              @if (addedToCart()) {
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 6L9 17l-5-5"/>
+                </svg>
+                Agregado
+              } @else {
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                </svg>
+                Agregar al carrito
+              }
+            </button>
+            <button class="btn secondary large" (click)="irAlCarrito()">
+              Ver carrito
+            </button>
+          </div>
+        } @else {
+          <div class="out-of-stock-message">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 8v4M12 16h.01"/>
+            </svg>
+            <p>Este producto no esta disponible actualmente. Vuelve pronto para ver si hay stock.</p>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</main>

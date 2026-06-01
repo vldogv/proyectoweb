@@ -1,44 +1,36 @@
-# See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
+# ─── Credenciales y entorno ──────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
 
-# Compiled output
-/dist
-/tmp
-/out-tsc
-/bazel-out
+# ─── Dependencias ────────────────────────────────────────────────────────────
+node_modules/
+**/node_modules/
 
-# Node
-/node_modules
-npm-debug.log
-yarn-error.log
+# ─── Builds ──────────────────────────────────────────────────────────────────
+dist/
+build/
+.angular/
+*.tsbuildinfo
 
-# IDEs and editors
-.idea/
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
+# ─── Subidas de usuarios (imágenes de productos) ─────────────────────────────
+backend/uploads/*
+!backend/uploads/.gitkeep
 
-# Visual Studio Code
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-!.vscode/mcp.json
-.history/*
+# ─── Logs ────────────────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+logs/
 
-# Miscellaneous
-/.angular/cache
-.sass-cache/
-/connect.lock
-/coverage
-/libpeerconnection.log
-testem.log
-/typings
-__screenshots__/
-
-# System files
+# ─── Sistema operativo / editor ──────────────────────────────────────────────
 .DS_Store
 Thumbs.db
+*.swp
+.idea/
+
+# ─── Claude / worktrees ──────────────────────────────────────────────────────
+.claude/worktrees/
+node_modules/
+.env

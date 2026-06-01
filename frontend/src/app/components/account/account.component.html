@@ -1,0 +1,119 @@
+<nav class="header">
+  <button class="back-btn" (click)="goHome()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M19 12H5M12 19l-7-7 7-7"/>
+    </svg>
+    Tienda
+  </button>
+  <h1 class="logo">Natureza</h1>
+  <button class="logout-btn" (click)="logout()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+      <polyline points="16 17 21 12 16 7"/>
+      <line x1="21" y1="12" x2="9" y2="12"/>
+    </svg>
+    Cerrar Sesión
+  </button>
+</nav>
+
+<main class="container">
+  <div class="account-header">
+    <div class="user-avatar">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+    </div>
+    <div class="user-info">
+      <h1 class="user-name">{{ user()?.fullName }}</h1>
+      <p class="user-email">{{ user()?.email }}</p>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab" [class.active]="activeTab() === 'orders'" (click)="setTab('orders')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <path d="M16 10a4 4 0 0 1-8 0"/>
+      </svg>
+      Mis Pedidos
+      @if (orders().length > 0) { <span class="badge">{{ orders().length }}</span> }
+    </button>
+    <button class="tab" [class.active]="activeTab() === 'addresses'" (click)="setTab('addresses')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+        <circle cx="12" cy="10" r="3"/>
+      </svg>
+      Direcciones
+      @if (addresses().length > 0) { <span class="badge">{{ addresses().length }}</span> }
+    </button>
+    <button class="tab" [class.active]="activeTab() === 'profile'" (click)="setTab('profile')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      Mi Perfil
+    </button>
+    <a routerLink="/soporte" class="tab">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+      Soporte
+    </a>
+  </div>
+
+  <div class="tab-content">
+    @if (activeTab() === 'orders') {
+      <app-order-history />
+    } @else if (activeTab() === 'addresses') {
+      <app-address-list />
+    } @else if (activeTab() === 'profile') {
+
+      @if (profileToast()) {
+        <div class="profile-toast" [class.ok]="profileToast()!.ok" [class.err]="!profileToast()!.ok">
+          {{ profileToast()!.msg }}
+        </div>
+      }
+
+      <div class="profile-section">
+        <h3 class="section-title">Información personal</h3>
+        <div class="profile-form">
+          <div class="form-group">
+            <label>Nombre completo</label>
+            <input type="text" [(ngModel)]="profileForm.fullName" placeholder="Tu nombre"/>
+          </div>
+          <div class="form-group read-only">
+            <label>Email (no editable)</label>
+            <input type="email" [value]="user()?.email" disabled/>
+          </div>
+          <button class="btn-save" (click)="guardarPerfil()" [disabled]="savingProfile()">
+            @if (savingProfile()) { Guardando… } @else { Guardar cambios }
+          </button>
+        </div>
+      </div>
+
+      <div class="profile-section">
+        <h3 class="section-title">Cambiar contraseña</h3>
+        <div class="profile-form">
+          <div class="form-group">
+            <label>Contraseña actual</label>
+            <input type="password" [(ngModel)]="passwordForm.currentPassword" placeholder="••••••••" autocomplete="current-password"/>
+          </div>
+          <div class="form-group">
+            <label>Nueva contraseña</label>
+            <input type="password" [(ngModel)]="passwordForm.newPassword" placeholder="Mínimo 6 caracteres" autocomplete="new-password"/>
+          </div>
+          <div class="form-group">
+            <label>Confirmar nueva contraseña</label>
+            <input type="password" [(ngModel)]="passwordForm.confirm" placeholder="Repite la contraseña" autocomplete="new-password"/>
+          </div>
+          <button class="btn-save" (click)="cambiarContrasena()" [disabled]="savingPass()">
+            @if (savingPass()) { Guardando… } @else { Cambiar contraseña }
+          </button>
+        </div>
+      </div>
+
+    }
+  </div>
+</main>

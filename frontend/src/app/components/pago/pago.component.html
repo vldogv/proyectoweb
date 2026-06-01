@@ -1,0 +1,410 @@
+<!-- pago.component.html -->
+<nav class="header">
+  <button class="back-btn" (click)="volver()" [disabled]="pagoService.estado() === 'procesando'">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M19 12H5M12 19l-7-7 7-7"/>
+    </svg>
+    Volver
+  </button>
+  <h1 class="logo">Natureza</h1>
+  <div class="header-spacer"></div>
+</nav>
+
+<main class="container">
+
+  <!-- ── ÉXITO ─────────────────────────────────────────────────────────── -->
+  @if (pagoService.estado() === 'exito') {
+    <div class="status-container success">
+      <div class="status-icon">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M9 12l2 2 4-4"/>
+        </svg>
+      </div>
+      <h1 class="status-title">¡Pago Aprobado!</h1>
+      <p class="status-message">Tu transacción se procesó con éxito. Hemos registrado tu pedido.</p>
+
+      <div class="order-number">
+        <span class="label">Número de orden</span>
+        <span class="value">{{ pagoService.pedidoCreado()?.id }}</span>
+      </div>
+
+      @if (pagoService.pedidoCreado()?.trackingNumber) {
+        <div class="order-number">
+          <span class="label">Número de guía</span>
+          <span class="value tracking">{{ pagoService.pedidoCreado()?.trackingNumber }}</span>
+        </div>
+      }
+
+      <div class="success-actions">
+        <button class="btn primary large" (click)="verPedido()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+          </svg>
+          Ver mi pedido
+        </button>
+        <button class="btn secondary large" (click)="volverTienda()">Seguir comprando</button>
+      </div>
+    </div>
+  }
+
+  <!-- ── ERROR ──────────────────────────────────────────────────────────── -->
+  @else if (pagoService.estado() === 'error') {
+    <div class="status-container error">
+      <div class="status-icon">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="15" y1="9" x2="9" y2="15"/>
+          <line x1="9"  y1="9" x2="15" y2="15"/>
+        </svg>
+      </div>
+      <h1 class="status-title">Pago Rechazado</h1>
+      <p class="status-message">{{ pagoService.getErrorMessage() }}</p>
+
+      <div class="error-actions">
+        <button class="btn primary large" (click)="reintentar()">Intentar nuevamente</button>
+        <button class="btn secondary large" (click)="volver()">Volver al carrito</button>
+      </div>
+    </div>
+  }
+
+  <!-- ── FORMULARIO ────────────────────────────────────────────────────── -->
+  @else {
+    @if (carritoService.avisoStock().length > 0) {
+      <div class="stock-alert">
+        <div class="stock-alert-header">
+          <strong>⚠️ Cambios en tu carrito</strong>
+          <button class="stock-alert-close" (click)="descartarAvisosStock()" title="Cerrar">×</button>
+        </div>
+        <ul>
+          @for (aviso of carritoService.avisoStock(); track aviso.productId) {
+            @if (aviso.type === 'removed') {
+              <li><strong>{{ aviso.productName }}</strong> se agotó y fue removido del carrito.</li>
+            } @else {
+              <li><strong>{{ aviso.productName }}</strong>: solo quedan {{ aviso.maxStock }} unidades. Ajustamos tu cantidad.</li>
+            }
+          }
+        </ul>
+      </div>
+    }
+
+    <div class="checkout-layout">
+
+      <!-- Columna izquierda: dirección + envío + método de pago -->
+      <div class="form-section">
+        <h1 class="page-title">Pago</h1>
+
+        <!-- Paso 1: Dirección de envío -->
+        <div class="form-card">
+          <div class="section-header-row">
+            <h2 class="section-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px;vertical-align:middle">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+              Dirección de envío
+            </h2>
+            @if (addressService.userAddresses().length > 0 && modoDireccion() === 'seleccionar') {
+              <button type="button" class="btn-link" (click)="modoDireccion.set('nueva')">+ Nueva dirección</button>
+            }
+            @if (modoDireccion() === 'nueva' && addressService.userAddresses().length > 0) {
+              <button type="button" class="btn-link" (click)="modoDireccion.set('seleccionar')">Usar guardada</button>
+            }
+          </div>
+
+          <!-- Selector de direcciones existentes -->
+          @if (modoDireccion() === 'seleccionar' && addressService.userAddresses().length > 0) {
+            <div class="address-list">
+              @for (addr of addressService.userAddresses(); track addr.id) {
+                <label class="address-option" [class.selected]="addr.isDefault" (click)="seleccionarDireccion(addr.id)">
+                  <div class="address-radio"><div class="address-radio-inner"></div></div>
+                  <div class="address-info">
+                    <span class="address-label">{{ addr.label }} · {{ addr.fullName }}</span>
+                    <span class="address-detail">{{ addr.street }}, {{ addr.city }} {{ addr.postalCode }}</span>
+                    <span class="address-detail">Tel: {{ addr.phone }}</span>
+                  </div>
+                </label>
+              }
+            </div>
+          }
+
+          <!-- Formulario nueva dirección -->
+          @if (modoDireccion() === 'nueva') {
+            <div class="payment-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Nombre completo del destinatario *</label>
+                  <input type="text" class="form-input" [(ngModel)]="nuevaDireccion.fullName" placeholder="Juan Pérez"/>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Calle y número *</label>
+                  <input type="text" class="form-input" [(ngModel)]="nuevaDireccion.street" placeholder="Av. Reforma 123, Col. Centro"/>
+                </div>
+              </div>
+              <div class="form-row two-cols">
+                <div class="form-group">
+                  <label class="form-label">Ciudad *</label>
+                  <input type="text" class="form-input" [(ngModel)]="nuevaDireccion.city" placeholder="Ciudad de México"/>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Código postal *</label>
+                  <input type="text" class="form-input" [(ngModel)]="nuevaDireccion.postalCode" placeholder="06000" maxlength="5"/>
+                </div>
+              </div>
+              <div class="form-row two-cols">
+                <div class="form-group">
+                  <label class="form-label">Teléfono *</label>
+                  <input type="tel" class="form-input" [(ngModel)]="nuevaDireccion.phone" placeholder="55 1234 5678"/>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Etiqueta</label>
+                  <input type="text" class="form-input" [(ngModel)]="nuevaDireccion.label" placeholder="Casa, Oficina…"/>
+                </div>
+              </div>
+              <button type="button" class="btn primary" (click)="guardarNuevaDireccion()"
+                [disabled]="!nuevaDireccionValida || guardandoDireccion()">
+                @if (guardandoDireccion()) { Guardando… } @else { Guardar dirección }
+              </button>
+            </div>
+          }
+        </div>
+
+        <!-- Paso 2: Envío -->
+        <div class="form-card">
+          <h2 class="section-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px;vertical-align:middle">
+              <rect x="1" y="3" width="15" height="13" rx="1"/>
+              <path d="M16 8h4l3 5v4h-7V8z"/>
+              <circle cx="5.5" cy="18.5" r="2.5"/>
+              <circle cx="18.5" cy="18.5" r="2.5"/>
+            </svg>
+            Método de envío
+          </h2>
+          <app-resumen-envio></app-resumen-envio>
+        </div>
+
+        <!-- Paso 2.5: Factura CFDI personalizada (opcional) -->
+        <div class="form-card">
+          <label class="factura-toggle">
+            <input type="checkbox" [checked]="requiereFactura()"
+              (change)="requiereFactura.set($any($event.target).checked)"/>
+            <span class="factura-toggle-label">
+              <strong>¿Requieres factura?</strong>
+              <small>Recibirás un CFDI 4.0 con tus datos fiscales. Si no, recibirás recibo público en general.</small>
+            </span>
+          </label>
+
+          @if (requiereFactura()) {
+            <div class="payment-form slide-down">
+              <div class="form-row two-cols">
+                <div class="form-group">
+                  <label class="form-label">RFC *</label>
+                  <input type="text" class="form-input" [(ngModel)]="facturaForm.rfc"
+                    placeholder="XAXX010101000" maxlength="13"
+                    style="text-transform:uppercase"/>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Código postal fiscal *</label>
+                  <input type="text" class="form-input" [(ngModel)]="facturaForm.domicilioFiscal"
+                    placeholder="06000" maxlength="5"/>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Razón social *</label>
+                  <input type="text" class="form-input" [(ngModel)]="facturaForm.razonSocial"
+                    placeholder="Nombre o razón social como aparece en SAT"/>
+                </div>
+              </div>
+              <div class="form-row two-cols">
+                <div class="form-group">
+                  <label class="form-label">Régimen fiscal</label>
+                  <select class="form-input" [(ngModel)]="facturaForm.regimenFiscal">
+                    @for (r of regimenesFiscales; track r.value) {
+                      <option [value]="r.value">{{ r.label }}</option>
+                    }
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Uso del CFDI</label>
+                  <select class="form-input" [(ngModel)]="facturaForm.usoCFDI">
+                    @for (u of usosCFDI; track u.value) {
+                      <option [value]="u.value">{{ u.label }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+              @if (!facturaValida) {
+                <p class="factura-warning">Completa todos los campos. El RFC debe tener formato válido (12 o 13 caracteres).</p>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Paso 3: Método de pago -->
+        <div class="form-card">
+          <h2 class="section-title">Método de pago</h2>
+
+          <div class="payment-methods">
+            <label class="method-card" [ngClass]="{'active': metodoPago() === 'tarjeta'}" (click)="metodoPago.set('tarjeta')">
+              <div class="method-radio"><div class="radio-inner"></div></div>
+              <div class="method-info">
+                <span class="method-name">Tarjeta de Crédito o Débito</span>
+                <span class="method-desc">Visa, Mastercard, AMEX</span>
+              </div>
+              <div class="method-icons">
+                <svg width="32" height="20" viewBox="0 0 32 20" fill="none" stroke="#2c3e2d" stroke-width="1.5">
+                  <rect x="1" y="1" width="30" height="18" rx="3"/><path d="M1 7h30M6 14h6"/>
+                </svg>
+              </div>
+            </label>
+
+            <label class="method-card" [ngClass]="{'active': metodoPago() === 'paypal'}" (click)="metodoPago.set('paypal')">
+              <div class="method-radio"><div class="radio-inner"></div></div>
+              <div class="method-info">
+                <span class="method-name">PayPal</span>
+                <span class="method-desc">Pago rápido y seguro</span>
+              </div>
+            </label>
+          </div>
+
+          <!-- Formulario tarjeta -->
+          @if (metodoPago() === 'tarjeta') {
+            <div class="payment-form slide-down">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Titular de la tarjeta</label>
+                  <input type="text" class="form-input" placeholder="Nombre como aparece en la tarjeta"
+                    [value]="titularTarjeta()"
+                    (input)="titularTarjeta.set($any($event.target).value)"/>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Número de tarjeta</label>
+                  <input type="text" class="form-input" placeholder="0000 0000 0000 0000"
+                    [value]="numeroTarjeta()"
+                    (input)="formatearNumeroTarjeta($event)" maxlength="19"/>
+                </div>
+              </div>
+              <div class="form-row two-cols">
+                <div class="form-group">
+                  <label class="form-label">Expiración</label>
+                  <input type="text" class="form-input" placeholder="MM/YY"
+                    [value]="fechaExpiracion()"
+                    (input)="formatearExpiracion($event)" maxlength="5"/>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">CVV</label>
+                  <input type="password" class="form-input" placeholder="123"
+                    [value]="cvv()"
+                    (input)="cvv.set($any($event.target).value.replace(/\D/g,'').substring(0,4))"/>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- Botones PayPal SDK embebido -->
+          @if (metodoPago() === 'paypal') {
+            <div class="payment-form slide-down">
+              @if (hayAvisosStock) {
+                <p class="bloqueo-pago">Revisa los cambios en tu carrito antes de continuar con el pago.</p>
+              } @else {
+                <!-- El SDK inyecta los botones aquí -->
+                <div #paypalButtonContainer id="paypal-button-container"></div>
+
+                @if (sdkCapturando()) {
+                  <div class="sdk-procesando">
+                    <span class="spinner-small"></span>
+                    Procesando pago con PayPal…
+                  </div>
+                }
+              }
+            </div>
+          }
+        </div><!-- /form-card pago -->
+      </div>
+
+      <!-- Columna derecha: resumen del pedido -->
+      <div class="summary-section">
+        <div class="summary-card">
+          <h2 class="section-title">Resumen de compra</h2>
+
+          @if (items().length === 0) {
+            <p style="color:#8a9e8b;font-style:italic;">Tu carrito está vacío.</p>
+          } @else {
+            <ul class="summary-list">
+              @for (item of items(); track item.product.id) {
+                <li class="summary-item">
+                  <img [src]="item.product.imageUrl" [alt]="item.product.name" class="item-image"/>
+                  <div class="item-info">
+                    <span class="item-name">{{ item.product.name }}</span>
+                    <span class="item-qty">Cantidad: {{ item.quantity }}</span>
+                  </div>
+                  <span class="item-price">
+                    {{ item.product.price * item.quantity | currency:'MXN':'symbol-narrow':'1.2-2' }}
+                  </span>
+                </li>
+              }
+            </ul>
+
+            <div class="summary-totals">
+              <div class="total-row">
+                <span>Subtotal</span>
+                <span>{{ subtotal() | currency:'MXN':'symbol-narrow':'1.2-2' }}</span>
+              </div>
+              <div class="total-row">
+                <span>Envío</span>
+                @if (envioService.costoEnvio() === 0) {
+                  <span class="free">Gratis</span>
+                } @else {
+                  <span>{{ envioService.costoEnvio() | currency:'MXN':'symbol-narrow':'1.2-2' }}</span>
+                }
+              </div>
+              <div class="total-row final">
+                <span>Total a pagar</span>
+                <span>{{ total() | currency:'MXN':'symbol-narrow':'1.2-2' }}</span>
+              </div>
+            </div>
+
+            @if (metodoPago() === 'tarjeta') {
+              <button
+                class="btn primary large full-width"
+                [disabled]="!puedePagar || pagoService.estado() === 'procesando'"
+                (click)="procesarPago()">
+                @if (pagoService.estado() === 'procesando') {
+                  <span class="spinner-small"></span>
+                  Procesando pago...
+                } @else {
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                  Pagar {{ total() | currency:'MXN':'symbol-narrow':'1.2-2' }}
+                }
+              </button>
+            }
+
+            <div class="security-footer">
+              <div class="secure-note">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                Datos protegidos por cifrado SSL de 256 bits
+              </div>
+              <div class="payment-brands">
+                <span class="brand">Visa</span>
+                <span class="brand">Mastercard</span>
+                <span class="brand">Amex</span>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+    </div>
+  }
+</main>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<products>
+
+  <product>
+    <id>1</id>
+    <name>Crema Hidratante de Lavanda</name>
+    <price>299.00</price>
+    <imageUrl>lavanda.jpeg.webp</imageUrl>
+    <category>Cremas</category>
+    <description>Crema hidratante natural con extracto de lavanda. Suaviza y nutre la piel profundamente.</description>
+    <inStock>true</inStock>
+  </product>
+
+  <product>
+    <id>2</id>
+    <name>Crema de Argán y Rosa Mosqueta</name>
+    <price>349.00</price>
+    <imageUrl>aragon.webp</imageUrl>
+    <category>Cremas</category>
+    <description>Crema regeneradora con aceite de argán y rosa mosqueta. Ideal para piel seca y madura.</description>
+    <inStock>true</inStock>
+  </product>
+
+  <product>
+    <id>3</id>
+    <name>Esencia de Árbol de Té</name>
+    <price>189.00</price>
+    <imageUrl>te.jpg</imageUrl>
+    <category>Esencias</category>
+    <description>Aceite esencial 100% puro de árbol de té. Propiedades antibacterianas y purificantes.</description>
+    <inStock>true</inStock>
+  </product>
+
+  <product>
+    <id>4</id>
+    <name>Esencia de Eucalipto</name>
+    <price>169.00</price>
+    <imageUrl>eucalipto.jpeg.webp</imageUrl>
+    <category>Esencias</category>
+    <description>Esencia natural de eucalipto. Perfecta para aromaterapia y alivio respiratorio.</description>
+    <inStock>true</inStock>
+  </product>
+
+  <product>
+    <id>5</id>
+    <name>Miel de Abeja Pura</name>
+    <price>220.00</price>
+    <imageUrl>miel.jpg.webp</imageUrl>
+    <category>Mieles</category>
+    <description>Miel de abeja 100% natural y sin procesar. Cosechada artesanalmente de colmenas locales.</description>
+    <inStock>true</inStock>
+  </product>
+
+  <product>
+    <id>6</id>
+    <name>Miel de Manuka</name>
+    <price>480.00</price>
+    <imageUrl>manuka.jpg</imageUrl>
+    <category>Mieles</category>
+    <description>Miel de Manuka importada con propiedades antimicrobianas únicas. Alta concentración de MGO.</description>
+    <inStock>false</inStock>
+  </product>
+
+  
+
+</products>

@@ -1,0 +1,91 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f4f1eb;
+  color: #2c3e2d;
+  font-family: 'DM Sans', sans-serif;
+  transition: background 0.3s, color 0.3s;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f4f1eb;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d0ccc4;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #b8b4ac;
+}
+
+/* Selection */
+::selection {
+  background: #3a5a40;
+  color: white;
+}
+
+/* Focus */
+:focus-visible {
+  outline: 2px solid #3a5a40;
+  outline-offset: 2px;
+}
+
+/* DARK MODE */
+body.dark-mode {
+  background: #181f19;
+  color: #c8e6c9;
+}
+
+body.dark-mode::-webkit-scrollbar-track {
+  background: #181f19;
+}
+
+body.dark-mode::-webkit-scrollbar-thumb {
+  background: #2e3d2f;
+}
+
+body.dark-mode::-webkit-scrollbar-thumb:hover {
+  background: #3a4a3b;
+}
+
+body.dark-mode ::selection {
+  background: #4a7a50;
+}
+
+body.dark-mode .card {
+  background: #242f25;
+}
+
+body.dark-mode .cart {
+  background: #1f2a20;
+  border-color: #2e3d2f;
+  color: #c8e6c9;
+}
+
+body.dark-mode .title,
+body.dark-mode h2,
+body.dark-mode h3 {
+  color: #c8e6c9;
+}
+
+body.dark-mode .line {
+  color: #a8c8a9;
+}
+
+body.dark-mode .item {
+  background: #2a3a2b;
+  border-color: #2e3d2f;
+}
